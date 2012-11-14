@@ -42,11 +42,15 @@ If the tile flipped over is not their agent tile, they are out and play continue
 
 If all but one player is out, the last player must show that his alien is still on the island to claim victory!
 
+## Technical Implementation
 
+I want this game to be playable real time. I plan on using *node.js* to power real time information transactions. The gamestate will be stored in its most basic representation as a json object. No rendering information will be stored with the gamestate. In theory, this means a single gamestate could be displayed by many different rendering environments and many different devices. My reasoning behind this idea is I believe it is absurd that I cannot play many simple games with friends because of the interface I choose to use, whether it be an iPhone, an XBOX or a computer.
+
+The rendering engine will be built using html, css3 and javascript. I will use jQuery to supply dom and animation functions. I think people might be surprised at what can be accomplished with this lowly combination. No, I won't have full 3D graphics. I'm not an artist either so you'll have to deal with programmer art, too!
 
 ## Development Team
 
-* [R. Ryan Driskel](http://twitter.com/vanish56), Director of Software Development at DealerHD
+* [R. Ryan Driskel](http://twitter.com/vanish56), Director of Software Development at DealerHD, Big Pear Studios
 * [Forrest G. Driskel](https://twitter.com/TheMeepleChase), Founder and Editor of The Meeplchase
 
 # Comments / Questions / Help

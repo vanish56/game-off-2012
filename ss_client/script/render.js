@@ -1,7 +1,7 @@
 function Render(){
 	Render_Board(gamestate.board);
 	Render_Stats(gamestate);
-	RenderLog(gamestate.log)
+	Render_Log(gamestate.log)
 	Render_Menu(gamestate.phase);
 	Render_Players(gamestate.players);
 }
@@ -16,28 +16,20 @@ function Render_Board(board){
 		$(node).css({ 'width':x+'px', 'height':y+'px', 'top':(-y/2)+'px', 'left':(-x/2)+'px'});
 		$("#surface").append(node);
 	}
+	Render_Drops(board.drops);
 	Render_Board_Hexes(board.hexes);
-	$("div").removeClass("neighbor");
-	if (gamestate.active.action && gamestate.active.action.token){
-		Render_Mark_Neighbor(gamestate.active.action.token.row, gamestate.active.action.token.col, 0, function(r,c){
-			var hname = 'hex_'+r+'_'+c;
-			$('#'+hname).addClass("neighbor");
-		});
-	}
-	
-	RenderDrops(board.drops);
 }
 
-function RenderDrops(drops){
+function Render_Drops(drops){
 	var node = $('#drops');
 	if (node.length == 0){
 		node = $('<div id="drops"></div>');
 		var x = $('#board').position().left;
 		//var y = $('#board').position().top;
-		var height = drops.length*260;
+		var height = drops.length*260/2;
 		//var x = (Object.keys(board.hexes).length*220+80);
 		//var y = (Object.keys(board.hexes).length*260+130);
-		$(node).css({ 'width':'300px', 'height':height+'px', 'top':(-height/2)+'px', 'left':(-x+20)+'px'});
+		$(node).css({ 'width':(height+500)+'px', 'height':height+'px', 'top':(-height/2)+'px', 'left':(x-300)+'px'});
 		$("#surface").append(node);
 	}
 	for(var p = 0; p < drops.length; p++){
@@ -50,49 +42,100 @@ function Render_Drop(drop, p){
 	var node = $('#'+nodeName);
 	if (node.length == 0){
 		node = $('<div id="'+nodeName+'" class="drop">'+String.fromCharCode(65 + p)+'</div>');
-		$(node).css({ 'width':'300px', 'height':'260px', 'top':(p*260)+'px', 'left':'0px'});
+		$(node).css({ 'width':'300px', 'height':'260px', 'top':(Math.floor(p/2)*260)+'px' });
+		if (p%2){
+			$(node).css({ 'right':'0px'});
+		} else {
+			$(node).css({ 'left':'0px'});
+		}
+		$(node).click(function(){ Interface_DropClicked( { 'position': p } ); });
 		$("#drops").append(node);
 	}
+	
 	var tname = 'drop_'+p+'_tile';
 	if (drop.tile == 1){
 		var tile = $('#'+tname)
 		if (tile.length == 0){
 			tile = $('<div id="'+tname+'" class="tile"></div>');
 			$(node).append(tile);
-			$(drop).click(function(){ Interface_DropClicked( { 'position': p } ); });
+		}
+		if (gamestate.active.action && gamestate.active.action.drop && gamestate.active.action.drop.position == p){
+			$(tile).addClass('saved');
+		} else {
+			$(tile).removeClass('saved');
 		}
 	} else {
 		$('#'+tname).remove();
-	}}
+		
+		if (gamestate.active.action && gamestate.active.action.token){
+			$(node).addClass('choose');
+		} else {
+			$(node).removeClass('choose');
+		}
+	}
+}
 
 function Render_Board_Hexes(hexes){
 	//console.log("Render_Board_Hexes", arguments);
+	$("div").removeClass("neighbor");
+	$("div").removeClass("blocked");
+	
 	for (var row in hexes){
 		for (var col in hexes[row]){
 			Render_Board_Hex(hexes[row][col], row, col)	
 		}	
 	}
-}
-
-function Render_Mark_Neighbor(row, col, showFilled, func){
-	if (!func) return;
-	var neighbors = Gamestate_Hex_Neighbors(row, col, showFilled);
-	for(var n = 0; n < neighbors.length; n++){
-		func(neighbors[n].row, neighbors[n].col);
+	
+	if (gamestate.active.action && gamestate.active.action.token){
+		Render_Mark_Neighbors(gamestate.active.action.token.row, gamestate.active.action.token.col, 0, 1, function(r,c){
+			var hname = 'hex_'+r+'_'+c;
+			$('#'+hname).addClass("neighbor");
+		});
 	}
+	
+	if (gamestate.phase == "Action - Land"){
+		Render_Mark_LandingZones(function(r,c){
+			var hname = 'hex_'+r+'_'+c;
+			$('#'+hname).addClass("neighbor");
+		});
+	}
+	
+	if (gamestate.phase == "Action - Place - Hex"){
+		Render_Mark_BlockedZones(function(r,c){
+			var hname = 'hex_'+r+'_'+c;
+			$('#'+hname).addClass("blocked");
+		});
+	}
+	/* 
+	// TODO
+	// 1.) Does not work properly
+	// 2.) The idea is to show only legal spots, but this usually results in too many highlights to be of use
+	if (gamestate.active.action && gamestate.active.action.drop){
+		for (var row in hexes){
+			for (var col in hexes[row]){	
+				console.log("Render_Mark_Neighbors", row, col);
+				Render_Mark_Neighbors(row, col, 1, 0, function(r,c){
+					var hname = 'hex_'+r+'_'+c;
+					$('#'+hname).addClass("neighbor");
+				});
+			}
+		}
+	}
+	*/
 }
 
 function Render_Board_Hex(hItem, row, col){
 	var hname = 'hex_'+row+'_'+col;
 	var hex = $('#'+hname)
 	if (hex.length == 0){
-		hex = $('<div id="'+hname+'" class="hex"></div>');
+		hex = $('<div id="'+hname+'" class="hex">'+row+','+col+'</div>');
 		var x = (row*220);
 		var y = (col*260+(row%2*130));
 		$(hex).css({ 'top': y+'px', 'left': x+'px' });
 		$("#board").append(hex);
 		$(hex).click(function(){ Interface_HexClicked( { 'row': row, 'col': col } ); });
 	}
+	
 							
 	var tname = 'hex_'+row+'_'+col+'_tile';
 	if (hItem.tile == 1){
@@ -100,6 +143,11 @@ function Render_Board_Hex(hItem, row, col){
 		if (tile.length == 0){
 			tile = $('<div id="'+tname+'" class="tile"></div>');
 			$(hex).append(tile);
+		}
+		if (gamestate.active.action && gamestate.active.action.token && gamestate.active.action.token.row == row && gamestate.active.action.token.col == col){
+			$(tile).addClass('saved');
+		} else {
+			$(tile).removeClass('saved');
 		}
 	} else {
 		$('#'+tname).remove();
@@ -131,6 +179,11 @@ function Render_Players_Player(player, container){
 	} else {
 		$(node).removeClass('active');
 	}
+	if (player.eliminated==1){
+		$(node).addClass('eliminated');
+	} else {
+		$(node).removeClass('eliminated');
+	}
 }
 
 function Render_Stats(gamestate){
@@ -142,9 +195,32 @@ function Render_Stats(gamestate){
 	}
 }
 
+function Render_Mark_Neighbors(row, col, filled, empty, func){
+	if (!func) { return; }
+	var neighbors = GS_Hex_Neighbors(row, col, filled, empty);
+	for(var n = 0; n < neighbors.length; n++){
+		func(neighbors[n].row, neighbors[n].col);
+	}
+}
+
+function Render_Mark_LandingZones(func){
+	if (!func) { return; }
+	var lzs = GS_LandingZones();
+	for (var lz = 0; lz < lzs.length; lz++){
+		func(lzs[lz].row, lzs[lz].col);
+	}
+}
+
+function Render_Mark_BlockedZones(func){
+	if (!func) { return; }
+	var lzs = GS_OpenHexes();
+	for (var lz = 0; lz < lzs.length; lz++){
+		func(lzs[lz].row, lzs[lz].col);
+	}
+}
+
 function Render_Menu(phase){
 	//console.log("Render_Menu", arguments);
-	console.log()
 	var node = $('#menu');
 	if (node.length == 0){
 		node = $('<div id="menu"></div>');
@@ -162,10 +238,12 @@ function Render_Menu(phase){
 		case "Action - Push - Hex": Render_Menu_Action_Push_Hex(); break;
 		
 		case "Action - Pull": Render_Menu_Action_Pull(); break;
-		case "Action - Pull - Drop": Render_Menu_Action_Pull_Hex(); break;
+		case "Action - Pull - Drop": Render_Menu_Action_Pull_Drop(); break;
 		
 		case "Action - Place": Render_Menu_Action_Place(); break;
 		case "Action - Place - Hex": Render_Menu_Action_Place_Hex(); break;
+		
+		case "Action - Land": Render_Menu_Action_Land(); break;
 	}
 }
 
@@ -224,7 +302,13 @@ function Render_Menu_Action_Place_Hex(){
 	Render_Menu_Button('MSG', 'Click on a hex neighboring a token.',  $("#menu"));
 }
 
+function Render_Menu_Action_Land(){
+	//console.log("Render_Menu_Action_Push_Hex", arguments);
 
+	$('body').addClass("selecthex");	
+	Render_Menu_Button("O", "Cancel", $("#menu"), function(){ Action_Cancel(); });
+	Render_Menu_Button('MSG', 'Click on a hex surrounded by empty locations.',  $("#menu"));
+}
 
 
 function Render_Menu_Button(buttonType, str, menuNode, func){
@@ -241,7 +325,7 @@ function Render_Menu_Button(buttonType, str, menuNode, func){
 	}
 }
 
-function RenderLog(log){
+function Render_Log(log){
 	var nodeName = "log";
 	var node = $("#"+nodeName);
 	if (node.length == 0){
@@ -253,7 +337,11 @@ function RenderLog(log){
 		var logEntryNodeName = "log_"+i;
 		var logEntryNode = $("#"+logEntryNodeName);
 		if (logEntryNode.length == 0){
-			logEntryNode = $('<div id="'+logEntryNodeName+'">'+log[i]+'</div>');
+			var output = log[i];
+			for (p in gamestate.players){
+				output = output.replace(gamestate.players[p].name, '<span class="color_'+gamestate.players[p].color+'">'+gamestate.players[p].name+'</span>');
+			}
+			logEntryNode = $('<div id="'+logEntryNodeName+'">'+output+'</div>');
 			$(node).prepend(logEntryNode);
 		}
 	}

@@ -18,7 +18,7 @@ z-index: 1;
 #board {
 position: absolute;
 overflow: visible;
-z-index: 2;
+z-index: 3;
 }
 
 .hex {
@@ -26,16 +26,28 @@ position: absolute;
 width: 300px;
 height: 260px;
 background: url(../images/hex.png) no-repeat center center;
-z-index: 3;
+z-index: 4;
+font-size: 36px;
+text-align: center;
+line-height: 60px;
 }
 
 .selecthex .hex.neighbor {
 background: url(../images/hex_neighbor.png) no-repeat center center;
 }
 
+.selecthex .hex.blocked {
+background: url(../images/hex_black.png) no-repeat center center;
+}
+
 .selecthex .hex:hover {
 background: url(../images/hex_selected.png) no-repeat center center;
 }
+
+.selecthex .hex.blocked:hover {
+background: url(../images/hex_black.png) no-repeat center center;
+}
+
 
 .tile {
 position: absolute;
@@ -51,13 +63,17 @@ z-index: 4;
 background: url(../images/token_selected.png) no-repeat center center;
 }
 
-.selectdroptile #drop .tile:hover {
+.selectdroptile #drops .tile:hover {
 background: url(../images/token_selected.png) no-repeat center center;
+}
+
+.tile.saved {
+background: url(../images/token_saved.png) no-repeat center center;	
 }
 
 #drops {
 position: absolute;
-z-index: 4;
+z-index: 2;
 width: 300px;
 height: 260px;
 }
@@ -74,6 +90,10 @@ background: url(../images/drop.png) no-repeat center center;
 
 .selectdrop .drop:hover {
 background: url(../images/drop_selected.png) no-repeat center center;
+}
+
+.selectdrop .drop.choose {
+background: url(../images/drop_choose.png) no-repeat center center;
 }
 
 #stats {
@@ -134,6 +154,10 @@ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25),inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 
 .color_yellow .player_indicator {
 	background-color: yellow;
+}
+
+.player.eliminated {
+	opacity: 0.22;
 }
 
 #players .active {
@@ -213,4 +237,23 @@ z-index: 101;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 	padding: 5px;
+}
+
+#log .color_red {
+color: red;
+}
+
+#log .color_blue {
+	background-color: white;
+	color: blue;
+}
+
+
+#log .color_green {
+	color: green;
+}
+
+
+#log .color_yellow {
+	color: yellow;
 }

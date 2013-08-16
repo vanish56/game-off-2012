@@ -1,5 +1,5 @@
 var surface_rotation = 0;
-var surface_scale = 0.20;
+var surface_scale = 0.24;
 
 function Interface_Rotate(amt){
 	surface_rotation= (surface_rotation+amt)%360;
@@ -62,7 +62,7 @@ function Interface_DelegateEnter(){
 }
 
 function Interface_DropClicked(drop){
-	console.log('Interface_DropClicked', arguments);
+	//console.log('Interface_DropClicked', arguments);
 	switch (gamestate.phase){
 		case "Action - Pull - Drop":
 			Action_Pull_Drop(drop);
@@ -74,7 +74,7 @@ function Interface_DropClicked(drop){
 }
 
 function Interface_HexClicked(hex){
-	console.log('Interface_HexClicked', arguments);
+	//console.log('Interface_HexClicked', arguments);
 	switch (gamestate.phase){
 		case "Action - Push":
 			Action_Push_Token(hex);
@@ -87,6 +87,9 @@ function Interface_HexClicked(hex){
 		break;
 		case "Action - Place - Hex":
 			Action_Place_Hex(hex);
+		break;
+		case "Action - Land":
+			Action_Land_Hex(hex);
 		break;
 	}	
 }
